@@ -1,0 +1,124 @@
+/* ~/.config/waybar/style.css
+ * Dark, frosted, minimal — neon blue accents.
+ *
+ * NOTE: GTK3's CSS engine does not implement `backdrop-filter` — and unlike
+ * most unknown properties, this one is a hard parse error that crashes
+ * waybar on startup (exit code 1), not a harmless no-op. Do not add it back.
+ * The actual frosted-glass blur comes from the compositor (SwayFX
+ * `blur enable` in sway/config) seeing through this bar's translucent
+ * background — the alpha in background-color below is what matters.
+ */
+
+* {
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 13px;
+    min-height: 0;
+}
+
+window#waybar {
+    background: transparent;
+}
+
+#waybar {
+    background-color: rgba(26, 27, 38, 0.55);
+    border-radius: 12px;
+    border: 1px solid rgba(125, 207, 255, 0.15);
+    color: #c0caf5;
+}
+
+/* modules-left, center, right containers */
+#workspaces,
+#mode,
+#clock,
+#cpu,
+#memory,
+#battery,
+#network,
+#pulseaudio,
+#tray,
+#custom-power {
+    margin: 4px 2px;
+    padding: 0 10px;
+}
+
+#workspaces {
+    margin-left: 8px;
+    padding: 0 4px;
+}
+
+#workspaces button {
+    padding: 0 8px;
+    margin: 0 2px;
+    border-radius: 8px;
+    color: #565f89;
+    background: transparent;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+#workspaces button.focused {
+    color: #1a1b26;
+    background-color: #7dcfff;
+}
+
+#workspaces button.urgent {
+    color: #1a1b26;
+    background-color: #f7768e;
+}
+
+#workspaces button:hover {
+    background-color: rgba(125, 207, 255, 0.15);
+    color: #c0caf5;
+}
+
+#mode {
+    background-color: rgba(247, 118, 142, 0.15);
+    color: #f7768e;
+    border-radius: 8px;
+}
+
+#clock {
+    font-weight: 600;
+    color: #7dcfff;
+}
+
+#cpu, #memory, #battery, #network, #pulseaudio {
+    color: #c0caf5;
+}
+
+#battery.warning {
+    color: #e0af68;
+}
+
+#battery.critical {
+    color: #f7768e;
+}
+
+#tray {
+    margin-right: 6px;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#custom-power {
+    margin-right: 8px;
+    padding: 0 12px;
+    border-radius: 8px;
+    color: #f7768e;
+    transition: background-color 0.15s ease;
+}
+
+#custom-power:hover {
+    background-color: rgba(247, 118, 142, 0.15);
+}
+
+tooltip {
+    background-color: rgba(26, 27, 38, 0.9);
+    border: 1px solid rgba(125, 207, 255, 0.25);
+    border-radius: 8px;
+}
+
+tooltip label {
+    color: #c0caf5;
+}

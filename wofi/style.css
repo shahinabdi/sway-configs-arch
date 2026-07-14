@@ -1,0 +1,63 @@
+/* ~/.config/wofi/style.css
+ * Dark, translucent, neon-blue — matches waybar/mako.
+ * Real blur comes from SwayFX seeing through the alpha background below,
+ * same as waybar. Do NOT add `backdrop-filter` — GTK3 treats it as a fatal
+ * parse error, not a harmless no-op (see waybar/style.css for the postmortem).
+ */
+
+* {
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 14px;
+}
+
+window {
+    background-color: rgba(26, 27, 38, 0.65);
+    border: 1px solid rgba(125, 207, 255, 0.2);
+    border-radius: 14px;
+}
+
+#input {
+    margin: 10px;
+    padding: 8px 12px;
+    border: 1px solid rgba(125, 207, 255, 0.25);
+    border-radius: 10px;
+    background-color: rgba(22, 23, 31, 0.8);
+    color: #c0caf5;
+}
+
+#input:focus {
+    border-color: #7dcfff;
+}
+
+#inner-box {
+    margin: 0 10px 10px 10px;
+}
+
+#outer-box {
+    margin: 0;
+}
+
+#scroll {
+    margin: 0;
+}
+
+#text {
+    color: #c0caf5;
+}
+
+#entry {
+    padding: 8px;
+    border-radius: 10px;
+}
+
+#entry:selected {
+    background-color: rgba(125, 207, 255, 0.15);
+}
+
+#entry:selected #text {
+    color: #7dcfff;
+}
+
+#img {
+    margin-right: 10px;
+}
