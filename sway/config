@@ -9,7 +9,7 @@
 ###
 ### Install (Arch/CachyOS):
 ###   sudo pacman -S waybar wofi foot wl-clipboard xdg-desktop-portal-wlr \
-###                   xdg-desktop-portal xorg-xwayland grim slurp swaylock swayidle \
+###                   xdg-desktop-portal xorg-xwayland grim slurp swaylock-effects swayidle \
 ###                   brightnessctl playerctl pipewire pipewire-pulse wireplumber \
 ###                   polkit-gnome ttf-jetbrains-mono-nerd jq
 ###   yay -S swayfx awww mako

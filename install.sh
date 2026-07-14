@@ -50,7 +50,7 @@ fi
 ALL_PKGS=(
     waybar wofi foot wl-clipboard
     xdg-desktop-portal-wlr xdg-desktop-portal xorg-xwayland
-    grim slurp swaylock swayidle brightnessctl playerctl
+    grim slurp swaylock-effects swayidle brightnessctl playerctl
     pipewire pipewire-pulse wireplumber
     polkit-gnome ttf-jetbrains-mono-nerd jq
     mako swayfx awww

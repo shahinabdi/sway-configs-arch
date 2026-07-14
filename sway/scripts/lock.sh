@@ -17,11 +17,12 @@ swaylock \
     --ring-wrong-color f7768e \
     --key-hl-color 7dcfff \
     --line-uses-ring \
+    --indicator-idle-visible \
+    --show-keyboard-layout \
     --text-color c0caf5 \
     --text-clear-color c0caf5 \
     --text-ver-color c0caf5 \
     --text-wrong-color f7768e \
     --indicator-radius 90 \
     --indicator-thickness 8 \
-    --font "JetBrainsMono Nerd Font" \
-    --fade-in 0.2
+    --font "JetBrainsMono Nerd Font"
