@@ -19,7 +19,7 @@
 # ─────────────────────────────────────────────
 set $mod        Mod4
 set $term       alacritty
-set $menu       wofi --show drun --allow-images
+set $menu       ~/.config/sway/scripts/menu.sh
 set $lock       ~/.config/sway/scripts/lock.sh
 set $power      ~/.config/sway/scripts/powermenu.sh
 set $screenshot ~/.config/sway/scripts/screenshot.sh

@@ -138,6 +138,7 @@ done
 run chmod +x "$CONFIG_DIR/sway/scripts/lock.sh" \
              "$CONFIG_DIR/sway/scripts/powermenu.sh" \
              "$CONFIG_DIR/sway/scripts/screenshot.sh" \
+             "$CONFIG_DIR/sway/scripts/menu.sh" \
              "$CONFIG_DIR/awww/wallpaper.sh"
 
 # ─────────────────────────────────────────────
