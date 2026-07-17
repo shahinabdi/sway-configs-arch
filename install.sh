@@ -48,11 +48,11 @@ fi
 # 1. Packages
 # ─────────────────────────────────────────────
 ALL_PKGS=(
-    waybar wofi foot wl-clipboard
+    waybar wofi alacritty wl-clipboard
     xdg-desktop-portal-wlr xdg-desktop-portal xorg-xwayland
     grim slurp swaylock-effects swayidle brightnessctl playerctl
     pipewire pipewire-pulse wireplumber
-    polkit-gnome ttf-jetbrains-mono-nerd jq
+    polkit-gnome ttf-jetbrains-mono-nerd ttf-firacode-nerd jq starship
     mako swayfx awww
 )
 
@@ -110,7 +110,7 @@ fi
 # ─────────────────────────────────────────────
 # 2. Deploy configs (backup anything already there)
 # ─────────────────────────────────────────────
-DIRS=(sway waybar mako awww wofi)
+DIRS=(sway waybar mako awww wofi alacritty)
 backed_up=0
 
 for d in "${DIRS[@]}"; do
@@ -157,7 +157,37 @@ if [ ! -e "$WALLPAPER" ]; then
 fi
 
 # ─────────────────────────────────────────────
-# 4. Audio services (usually already enabled on Arch, harmless if so)
+# 4. Starship prompt — bracketed-segments preset, hooked into bash
+# ─────────────────────────────────────────────
+if command -v starship >/dev/null 2>&1; then
+    STARSHIP_PRESET="$CONFIG_DIR/starship/alacritty.toml"
+
+    if [ ! -e "$STARSHIP_PRESET" ]; then
+        log "Generating starship bracketed-segments preset -> $STARSHIP_PRESET"
+        run mkdir -p "$CONFIG_DIR/starship"
+        run starship preset bracketed-segments -o "$STARSHIP_PRESET"
+    fi
+
+    # Alacritty's [env] doesn't expand $HOME, so the real export lives in ~/.bashrc.
+    if ! grep -q 'starship init bash' "$HOME/.bashrc" 2>/dev/null; then
+        log "Enabling starship in ~/.bashrc"
+        if [ "$DRY_RUN" = 1 ]; then
+            echo "+ append STARSHIP_CONFIG export + starship init to ~/.bashrc"
+        else
+            {
+                echo ''
+                echo '# Starship prompt (added by sway-configs-arch install.sh)'
+                echo 'export STARSHIP_CONFIG="$HOME/.config/starship/alacritty.toml"'
+                echo 'eval "$(starship init bash)"'
+            } >> "$HOME/.bashrc"
+        fi
+    fi
+else
+    warn "starship not installed — skipping prompt setup (re-run after installing it)."
+fi
+
+# ─────────────────────────────────────────────
+# 5. Audio services (usually already enabled on Arch, harmless if so)
 # ─────────────────────────────────────────────
 if command -v systemctl >/dev/null 2>&1; then
     run systemctl --user enable --now pipewire pipewire-pulse wireplumber 2>/dev/null || true
