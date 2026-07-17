@@ -61,7 +61,7 @@ fi
 ALL_PKGS=(
     waybar wofi alacritty wl-clipboard
     xdg-desktop-portal-wlr xdg-desktop-portal xorg-xwayland
-    grim slurp swaylock-effects swayidle brightnessctl playerctl
+    grim slurp spectacle swaylock-effects swayidle brightnessctl playerctl
     pipewire pipewire-pulse wireplumber
     polkit-gnome ttf-jetbrains-mono-nerd ttf-firacode-nerd jq starship
     mako swayfx awww
