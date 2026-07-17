@@ -2,10 +2,14 @@
 # install.sh — installs packages and deploys the configs in this repo to ~/.config.
 #
 # Usage:
-#   ./install.sh            # install packages + copy configs (backs up existing ones)
-#   ./install.sh --symlink  # symlink configs into ~/.config instead of copying
-#   ./install.sh --no-pkgs  # skip package installation, only deploy configs
-#   ./install.sh --dry-run  # print what would happen, change nothing
+#   ./install.sh                   # install packages + copy configs (backs up existing ones)
+#   ./install.sh --symlink         # symlink configs into ~/.config instead of copying
+#   ./install.sh --no-pkgs         # skip package installation, only deploy configs
+#   ./install.sh --dry-run         # print what would happen, change nothing
+#   ./install.sh --layout=qwerty   # skip the keyboard prompt (azerty|qwerty)
+#
+# The repo config is AZERTY (xkb_layout fr, workspace keys &é"'(-è_çà). If you
+# pick qwerty, the deployed sway config is converted to xkb_layout us and 1-0.
 #
 # Safe to re-run: existing ~/.config dirs are backed up (never silently overwritten),
 # already-installed packages are skipped, and nothing destructive runs without you
@@ -20,15 +24,22 @@ BACKUP_DIR="$HOME/.config-backup-$(date +%Y%m%d-%H%M%S)"
 SYMLINK=0
 INSTALL_PKGS=1
 DRY_RUN=0
+LAYOUT=""
 
 for arg in "$@"; do
     case "$arg" in
         --symlink) SYMLINK=1 ;;
         --no-pkgs) INSTALL_PKGS=0 ;;
         --dry-run) DRY_RUN=1 ;;
+        --layout=*) LAYOUT="${arg#*=}" ;;
         *) echo "unknown flag: $arg" >&2; exit 1 ;;
     esac
 done
+
+case "$LAYOUT" in
+    ""|azerty|qwerty) ;;
+    *) echo "invalid --layout '$LAYOUT' (expected azerty or qwerty)" >&2; exit 1 ;;
+esac
 
 log()  { printf '\033[1;34m::\033[0m %s\n' "$1"; }
 warn() { printf '\033[1;33m::\033[0m %s\n' "$1" >&2; }
@@ -142,7 +153,47 @@ run chmod +x "$CONFIG_DIR/sway/scripts/lock.sh" \
              "$CONFIG_DIR/awww/wallpaper.sh"
 
 # ─────────────────────────────────────────────
-# 3. Wallpaper + screenshot directories
+# 3. Keyboard layout — repo default is AZERTY (fr); offer QWERTY conversion
+# ─────────────────────────────────────────────
+if [ -z "$LAYOUT" ]; then
+    if [ -t 0 ]; then
+        read -rp "Keyboard layout — azerty or qwerty? [azerty] " LAYOUT
+        LAYOUT="${LAYOUT:-azerty}"
+        case "$LAYOUT" in
+            azerty|qwerty) ;;
+            *) warn "Unknown layout '$LAYOUT' — keeping azerty."; LAYOUT=azerty ;;
+        esac
+    else
+        LAYOUT=azerty
+        log "Non-interactive run — keeping default azerty layout (use --layout=qwerty to change)."
+    fi
+fi
+
+if [ "$LAYOUT" = qwerty ]; then
+    SWAY_CFG="$CONFIG_DIR/sway/config"
+    log "Converting sway config to QWERTY (xkb_layout us, workspace keys 1-0)..."
+    run sed -i \
+        -e 's/xkb_layout fr/xkb_layout us/' \
+        -e '/workspace number/ s/ampersand/1/' \
+        -e '/workspace number/ s/eacute/2/' \
+        -e '/workspace number/ s/quotedbl/3/' \
+        -e '/workspace number/ s/apostrophe/4/' \
+        -e '/workspace number/ s/parenleft/5/' \
+        -e '/workspace number/ s/minus/6/' \
+        -e '/workspace number/ s/egrave/7/' \
+        -e '/workspace number/ s/underscore/8/' \
+        -e '/workspace number/ s/ccedilla/9/' \
+        -e '/workspace number/ s/agrave/0/' \
+        "$SWAY_CFG"
+    if [ "$SYMLINK" = 1 ]; then
+        warn "--symlink mode: this edited the repo's own sway/config (git will show it as modified)."
+    fi
+else
+    log "Keeping AZERTY layout."
+fi
+
+# ─────────────────────────────────────────────
+# 4. Wallpaper + screenshot directories
 # ─────────────────────────────────────────────
 run mkdir -p "$HOME/Pictures/Wallpapers" "$HOME/Pictures/Screenshots"
 
@@ -157,7 +208,7 @@ if [ ! -e "$WALLPAPER" ]; then
 fi
 
 # ─────────────────────────────────────────────
-# 4. Starship prompt — bracketed-segments preset, hooked into bash
+# 5. Starship prompt — bracketed-segments preset, hooked into bash
 # ─────────────────────────────────────────────
 if command -v starship >/dev/null 2>&1; then
     STARSHIP_PRESET="$CONFIG_DIR/starship/alacritty.toml"
@@ -187,7 +238,7 @@ else
 fi
 
 # ─────────────────────────────────────────────
-# 5. Audio services (usually already enabled on Arch, harmless if so)
+# 6. Audio services (usually already enabled on Arch, harmless if so)
 # ─────────────────────────────────────────────
 if command -v systemctl >/dev/null 2>&1; then
     run systemctl --user enable --now pipewire pipewire-pulse wireplumber 2>/dev/null || true
