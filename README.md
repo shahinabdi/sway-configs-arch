@@ -4,6 +4,8 @@ A minimal, dark, blurry [SwayFX](https://github.com/WillPower3309/swayfx) deskto
 
 > **Note:** these configs require **SwayFX**, not vanilla sway, for blur, rounded corners, and shadows. SwayFX is a drop-in fork with the same config syntax. If you want vanilla sway, delete the block marked `[SWAYFX ONLY]` in `sway/config`.
 
+<img width="1280" height="800" alt="sway" src="https://github.com/user-attachments/assets/b814b340-808a-4ef4-9cf4-31aafdaeee3a" />
+
 ## What's inside
 
 | Component | Role | Config |
