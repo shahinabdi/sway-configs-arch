@@ -199,7 +199,10 @@ run mkdir -p "$HOME/Pictures/Wallpapers" "$HOME/Pictures/Screenshots"
 
 WALLPAPER="$HOME/Pictures/Wallpapers/current.jpg"
 if [ ! -e "$WALLPAPER" ]; then
-    if command -v magick >/dev/null 2>&1; then
+    if [ -f "$SCRIPT_DIR/current.jpg" ]; then
+        log "Installing bundled wallpaper -> $WALLPAPER"
+        run cp "$SCRIPT_DIR/current.jpg" "$WALLPAPER"
+    elif command -v magick >/dev/null 2>&1; then
         log "No wallpaper found — generating a plain dark placeholder at $WALLPAPER"
         run magick -size 1920x1080 xc:'#1a1b26' "$WALLPAPER"
     else

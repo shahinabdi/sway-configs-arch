@@ -34,7 +34,7 @@ The installer:
 - installs missing packages from the official repos, and from the AUR via `yay`/`paru` if available (`swayfx`, `awww`, …),
 - backs up any existing `~/.config/{sway,waybar,mako,awww,wofi,alacritty}` to `~/.config-backup-<timestamp>` — nothing is silently overwritten,
 - copies the configs into `~/.config` and marks the scripts executable,
-- creates `~/Pictures/Wallpapers` and `~/Pictures/Screenshots`, generating a plain dark placeholder wallpaper if you don't have one yet,
+- creates `~/Pictures/Wallpapers` and `~/Pictures/Screenshots`, installing the bundled `current.jpg` as wallpaper if you don't have one yet (existing wallpapers are never replaced),
 - generates the Starship [bracketed-segments](https://starship.rs/presets/bracketed-segments) preset at `~/.config/starship/alacritty.toml` and enables it in `~/.bashrc` (skipped if already present).
 
 Flags:
@@ -48,7 +48,7 @@ Flags:
 
 After installing:
 
-1. Drop your wallpaper at `~/Pictures/Wallpapers/current.jpg`.
+1. The bundled wallpaper lands at `~/Pictures/Wallpapers/current.jpg` — replace that file to use your own.
 2. Check your output name with `swaymsg -t get_outputs` and adjust the `output *` lines in `sway/config` if needed.
 3. Log into a Sway session (or run `sway` from a TTY).
 
@@ -84,6 +84,7 @@ Idle behavior: the screen locks after 5 minutes and outputs power off after 10; 
 
 ```
 ├── install.sh          # installer / deployer
+├── current.jpg         # default wallpaper (deployed to ~/Pictures/Wallpapers/)
 ├── sway/
 │   ├── config          # main SwayFX config
 │   └── scripts/        # lock, menu, powermenu, screenshot
