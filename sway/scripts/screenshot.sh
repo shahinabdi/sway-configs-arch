@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # ~/.config/sway/scripts/screenshot.sh
-# Usage: screenshot.sh [output|region|window]
+# Usage: screenshot.sh [output|region|window|snip]
 # Saves to ~/Pictures/Screenshots and copies to clipboard via wl-copy.
+# "snip" opens the capture in swappy for annotation instead (swappy handles
+# its own copy/save).
 
 set -euo pipefail
 
@@ -19,13 +21,18 @@ case "$mode" in
         geometry=$(slurp) || exit 0
         grim -g "$geometry" "$file"
         ;;
+    snip)
+        geometry=$(slurp) || exit 0
+        grim -g "$geometry" - | swappy -f - -o "$file"
+        exit 0
+        ;;
     window)
         geometry=$(swaymsg -t get_tree | \
             jq -r '.. | select(.type?=="con" and .focused?==true) | "\(.rect.x),\(.rect.y) \(.rect.width)x\(.rect.height)"')
         grim -g "$geometry" "$file"
         ;;
     *)
-        echo "usage: screenshot.sh [output|region|window]" >&2
+        echo "usage: screenshot.sh [output|region|window|snip]" >&2
         exit 1
         ;;
 esac

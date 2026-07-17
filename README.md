@@ -17,7 +17,7 @@ A minimal, dark, blurry [SwayFX](https://github.com/WillPower3309/swayfx) deskto
 | awww (swww) | Wallpaper daemon with fade transitions | [awww/wallpaper.sh](awww/wallpaper.sh) |
 | swaylock-effects | Themed lockscreen with keyboard-layout indicator | [sway/scripts/lock.sh](sway/scripts/lock.sh) |
 | grim + slurp | Screenshots (output / region / window) | [sway/scripts/screenshot.sh](sway/scripts/screenshot.sh) |
-| [Spectacle](https://apps.kde.org/spectacle/) | KDE screenshot tool on `$mod+Shift+S` (Windows-style snipping) | — |
+| [swappy](https://github.com/jtheoof/swappy) | Screenshot annotation on `$mod+Shift+S` (Windows-style snipping) | [sway/scripts/screenshot.sh](sway/scripts/screenshot.sh) |
 
 Helper scripts live in [sway/scripts/](sway/scripts/): launcher toggle ([menu.sh](sway/scripts/menu.sh)), power menu ([powermenu.sh](sway/scripts/powermenu.sh)), lockscreen ([lock.sh](sway/scripts/lock.sh)), screenshots ([screenshot.sh](sway/scripts/screenshot.sh)).
 
@@ -75,7 +75,7 @@ The repo config is **French (AZERTY)** — `xkb_layout fr`, workspace keys `&é"
 | `$mod+Shift+Space` | Toggle floating |
 | `$mod+r` | Resize mode |
 | `Print` / `$mod+Print` / `$mod+Shift+Print` | Screenshot output / region / window (grim + slurp) |
-| `$mod+Shift+s` | Region screenshot with KDE Spectacle, copied to clipboard |
+| `$mod+Shift+s` | Snip a region and annotate/copy/save it in swappy |
 | `XF86Audio*` / `XF86MonBrightness*` | Volume, media, brightness keys |
 
 Idle behavior: the screen locks after 5 minutes and outputs power off after 10; locking also happens before sleep.

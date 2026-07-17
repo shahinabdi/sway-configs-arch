@@ -9,7 +9,7 @@
 ###
 ### Install (Arch/CachyOS):
 ###   sudo pacman -S waybar wofi alacritty wl-clipboard xdg-desktop-portal-wlr \
-###                   xdg-desktop-portal xorg-xwayland grim slurp spectacle swaylock-effects swayidle \
+###                   xdg-desktop-portal xorg-xwayland grim slurp swappy swaylock-effects swayidle \
 ###                   brightnessctl playerctl pipewire pipewire-pulse wireplumber \
 ###                   polkit-gnome ttf-jetbrains-mono-nerd ttf-firacode-nerd jq starship
 ###   yay -S swayfx awww mako
@@ -191,9 +191,8 @@ bindsym $mod+r mode "resize"
 bindsym Print          exec $screenshot output
 bindsym $mod+Print      exec $screenshot region
 bindsym $mod+shift+Print exec $screenshot window
-# KDE Spectacle region capture (Windows-style Win+Shift+S): background mode,
-# rectangular region, copy to clipboard
-bindsym $mod+shift+s   exec spectacle -rbc
+# Windows-style Win+Shift+S snip: select region, annotate/copy/save in swappy
+bindsym $mod+shift+s   exec $screenshot snip
 
 # media / volume / brightness
 bindsym XF86AudioRaiseVolume  exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
