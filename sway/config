@@ -176,7 +176,16 @@ bindsym $mod+shift+agrave      move container to workspace number 10; workspace 
 
 workspace_auto_back_and_forth yes
 
-# resize mode
+# floating windows — mouse: hold $mod and drag to move, $mod + right-drag to
+# resize (floating_modifier above). Keyboard: direct resize without entering
+# the resize mode; works on the focused window, floating or tiled.
+bindsym $mod+ctrl+Left   resize shrink width 20px
+bindsym $mod+ctrl+Down   resize grow height 20px
+bindsym $mod+ctrl+Up     resize shrink height 20px
+bindsym $mod+ctrl+Right  resize grow width 20px
+bindsym $mod+ctrl+c      move position center
+
+# resize mode (also works on floating windows)
 mode "resize" {
     bindsym Left  resize shrink width 20px
     bindsym Down  resize grow height 20px

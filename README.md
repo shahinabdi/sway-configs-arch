@@ -73,7 +73,10 @@ The repo config is **French (AZERTY)** — `xkb_layout fr`, workspace keys `&é"
 | `$mod+s` / `$mod+w` / `$mod+e` | Stacking / tabbed / split layout |
 | `$mod+f` | Fullscreen |
 | `$mod+Shift+Space` | Toggle floating |
-| `$mod+r` | Resize mode |
+| `$mod+r` | Resize mode (works on floating windows too) |
+| `$mod+Ctrl+arrows` | Resize focused window directly (floating or tiled) |
+| `$mod+Ctrl+c` | Center a floating window |
+| `$mod` + drag / `$mod` + right-drag | Move / resize floating windows with the mouse |
 | `Print` / `$mod+Print` / `$mod+Shift+Print` | Screenshot output / region / window (grim + slurp) |
 | `$mod+Shift+s` | Snip a region and annotate/copy/save it in swappy |
 | `XF86Audio*` / `XF86MonBrightness*` | Volume, media, brightness keys |
