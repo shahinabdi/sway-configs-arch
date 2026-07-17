@@ -1,0 +1,72 @@
+name: Bug report
+description: Something in the configs or scripts doesn't work as expected
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill in as much as you can.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of the setup is affected?
+      options:
+        - sway config
+        - waybar
+        - wofi
+        - mako
+        - lockscreen (swaylock)
+        - wallpaper (awww)
+        - screenshots
+        - install.sh
+        - other / not sure
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, and what you expected instead.
+      placeholder: e.g. waybar doesn't start after login...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run ./install.sh
+        2. Log into sway
+        3. Press $mod+d
+        4. ...
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Distro, SwayFX version, and anything else relevant.
+      placeholder: |
+        - Distro: Arch Linux / CachyOS
+        - SwayFX version: `sway --version`
+        - Keyboard layout: fr
+        - GPU / driver:
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or output
+      description: "Sway logs, script output, or error messages. Tip: run `sway -d 2> ~/sway.log` for debug logs."
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I am using SwayFX (not vanilla sway), or the issue is unrelated to SwayFX-only features
+          required: true
+        - label: I searched existing issues and this hasn't been reported yet
+          required: true

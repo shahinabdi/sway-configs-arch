@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@2.0.0
+        with:
+          severity: warning
+
+  shell-syntax:
+    name: Bash syntax check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: bash -n on all scripts
+        run: |
+          set -e
+          for f in $(git ls-files '*.sh'); do
+            echo "checking $f"
+            bash -n "$f"
+          done
+
+  scripts-executable:
+    name: Scripts are executable
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check executable bit
+        run: |
+          set -e
+          fail=0
+          for f in $(git ls-files '*.sh'); do
+            mode=$(git ls-files -s "$f" | awk '{print $1}')
+            if [ "$mode" != "100755" ]; then
+              echo "::error file=$f::$f is not executable (git mode $mode) — run: git update-index --chmod=+x $f"
+              fail=1
+            fi
+          done
+          exit $fail
