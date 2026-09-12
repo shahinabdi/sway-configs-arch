@@ -45,6 +45,60 @@ log()  { printf '\033[1;34m::\033[0m %s\n' "$1"; }
 warn() { printf '\033[1;33m::\033[0m %s\n' "$1" >&2; }
 run()  { if [ "$DRY_RUN" = 1 ]; then echo "+ $*"; else "$@"; fi; }
 
+detect_display_manager() {
+    local manager
+
+    for manager in sddm gdm greetd lightdm ly emptty; do
+        if systemctl is-active --quiet "$manager.service" 2>/dev/null || \
+           systemctl is-enabled --quiet "$manager.service" 2>/dev/null; then
+            printf '%s\n' "$manager"
+            return
+        fi
+    done
+}
+
+configure_sddm() {
+    local aur_helper=""
+    local keymap="fr"
+
+    if [ "$LAYOUT" = qwerty ]; then
+        keymap="us"
+    fi
+
+    if ! pacman -Qi sddm >/dev/null 2>&1; then
+        log "Installing SDDM from official repositories..."
+        run sudo pacman -S --needed sddm || return 1
+    fi
+
+    if ! pacman -Qi sddm-sugar-candy-git >/dev/null 2>&1; then
+        if command -v yay >/dev/null 2>&1; then
+            aur_helper="yay"
+        elif command -v paru >/dev/null 2>&1; then
+            aur_helper="paru"
+        else
+            warn "Sugar Candy requires the AUR package sddm-sugar-candy-git."
+            warn "No AUR helper (yay/paru) found, so SDDM was not enabled."
+            return 1
+        fi
+
+        log "Installing Sugar Candy from the AUR via $aur_helper..."
+        run "$aur_helper" -S --needed sddm-sugar-candy-git || return 1
+    fi
+
+    log "Configuring Sugar Candy as the SDDM theme..."
+    if [ "$DRY_RUN" = 1 ]; then
+        echo "+ create /etc/sddm.conf.d/99-sway-configs-arch.conf with Sugar Candy theme"
+    else
+        sudo install -d -m 755 /etc/sddm.conf.d || return 1
+        printf '[Theme]\nCurrent=sugar-candy\n' | sudo tee /etc/sddm.conf.d/99-sway-configs-arch.conf >/dev/null || return 1
+    fi
+
+    log "Setting the SDDM login-screen keyboard layout to $keymap..."
+    run sudo localectl set-x11-keymap "$keymap" || return 1
+    log "Enabling SDDM..."
+    run sudo systemctl enable --now sddm.service || return 1
+}
+
 if [ "$EUID" -eq 0 ]; then
     echo "Don't run this as root — it uses sudo itself where needed." >&2
     exit 1
@@ -193,7 +247,39 @@ else
 fi
 
 # ─────────────────────────────────────────────
-# 4. Wallpaper + screenshot directories
+# 4. Display manager — preserve an existing manager; offer SDDM + Sugar Candy
+# ─────────────────────────────────────────────
+if command -v systemctl >/dev/null 2>&1; then
+    display_manager="$(detect_display_manager)"
+
+    if [ -n "$display_manager" ] && [ "$display_manager" != sddm ]; then
+        log "Detected display manager: $display_manager. Leaving it unchanged."
+    elif [ "$INSTALL_PKGS" != 1 ]; then
+        log "Skipping display-manager setup (--no-pkgs)."
+    elif [ -t 0 ]; then
+        if [ "$display_manager" = sddm ]; then
+            read -rp "SDDM detected. Configure Sugar Candy and the login keyboard layout? [y/N] " setup_sddm
+        else
+            read -rp "No display manager detected. Install SDDM with Sugar Candy? [y/N] " setup_sddm
+        fi
+
+        case "$setup_sddm" in
+            y|Y|yes|YES)
+                if ! configure_sddm; then
+                    warn "SDDM setup was not completed. Fix the reported issue and re-run the installer."
+                fi
+                ;;
+            *) log "Skipping SDDM setup. Start Sway from a TTY or configure a display manager later." ;;
+        esac
+    else
+        log "No display-manager setup in non-interactive mode. Start Sway from a TTY or configure one later."
+    fi
+else
+    warn "systemctl not found — skipping display-manager detection and setup."
+fi
+
+# ─────────────────────────────────────────────
+# 5. Wallpaper + screenshot directories
 # ─────────────────────────────────────────────
 run mkdir -p "$HOME/Pictures/Wallpapers" "$HOME/Pictures/Screenshots"
 
@@ -211,7 +297,7 @@ if [ ! -e "$WALLPAPER" ]; then
 fi
 
 # ─────────────────────────────────────────────
-# 5. Starship prompt — bracketed-segments preset, hooked into bash
+# 6. Starship prompt — bracketed-segments preset, hooked into bash
 # ─────────────────────────────────────────────
 if command -v starship >/dev/null 2>&1; then
     STARSHIP_PRESET="$CONFIG_DIR/starship/alacritty.toml"
@@ -241,7 +327,7 @@ else
 fi
 
 # ─────────────────────────────────────────────
-# 6. Audio services (usually already enabled on Arch, harmless if so)
+# 7. Audio services (usually already enabled on Arch, harmless if so)
 # ─────────────────────────────────────────────
 if command -v systemctl >/dev/null 2>&1; then
     run systemctl --user enable --now pipewire pipewire-pulse wireplumber 2>/dev/null || true
