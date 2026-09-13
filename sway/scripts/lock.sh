@@ -3,7 +3,11 @@
 # Dark, minimal lockscreen matching the rest of the theme.
 # Colors follow the neon-blue-on-dark-navy palette used in waybar/mako.
 
+# Prevent running multiple instances of swaylock stacked on top of each other
+pgrep -x swaylock >/dev/null && exit 0
+
 swaylock \
+    --daemonize \
     --image ~/Pictures/Wallpapers/current.jpg \
     --scaling fill \
     --color 1a1b26 \
