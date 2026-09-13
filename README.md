@@ -42,6 +42,7 @@ The installer:
 Flags:
 
 ```sh
+./install.sh --update          # pull latest git changes & redeploy configs
 ./install.sh --symlink         # symlink configs into ~/.config instead of copying
 ./install.sh --no-pkgs         # skip package installation, only deploy configs
 ./install.sh --dry-run         # print what would happen, change nothing

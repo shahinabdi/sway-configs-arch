@@ -3,6 +3,7 @@
 #
 # Usage:
 #   ./install.sh                   # install packages + copy configs (backs up existing ones)
+#   ./install.sh --update          # pull latest git updates & redeploy configs
 #   ./install.sh --symlink         # symlink configs into ~/.config instead of copying
 #   ./install.sh --no-pkgs         # skip package installation, only deploy configs
 #   ./install.sh --dry-run         # print what would happen, change nothing
@@ -24,6 +25,7 @@ BACKUP_DIR="$HOME/.config-backup-$(date +%Y%m%d-%H%M%S)"
 SYMLINK=0
 INSTALL_PKGS=1
 DRY_RUN=0
+UPDATE=0
 LAYOUT=""
 
 for arg in "$@"; do
@@ -31,6 +33,7 @@ for arg in "$@"; do
         --symlink) SYMLINK=1 ;;
         --no-pkgs) INSTALL_PKGS=0 ;;
         --dry-run) DRY_RUN=1 ;;
+        --update) UPDATE=1 ;;
         --layout=*) LAYOUT="${arg#*=}" ;;
         *) echo "unknown flag: $arg" >&2; exit 1 ;;
     esac
@@ -70,19 +73,33 @@ configure_sddm() {
         run sudo pacman -S --needed sddm || return 1
     fi
 
+    # Ensure required Qt dependencies for Sugar Candy
+    log "Ensuring Qt5 graphical components for Sugar Candy..."
+    run sudo pacman -S --needed qt5-graphicaleffects qt5-quickcontrols2 qt5-svg 2>/dev/null || true
+
     if ! pacman -Qi sddm-sugar-candy-git >/dev/null 2>&1; then
         if command -v yay >/dev/null 2>&1; then
-            aur_helper="yay"
+            log "Installing Sugar Candy from AUR via yay..."
+            run yay -S --needed sddm-sugar-candy-git || return 1
         elif command -v paru >/dev/null 2>&1; then
-            aur_helper="paru"
+            log "Installing Sugar Candy from AUR via paru..."
+            run paru -S --needed sddm-sugar-candy-git || return 1
+        elif command -v git >/dev/null 2>&1 && command -v makepkg >/dev/null 2>&1; then
+            log "No AUR helper (yay/paru) found. Building sddm-sugar-candy-git directly via makepkg..."
+            local tmpdir
+            tmpdir="$(mktemp -d)"
+            run git clone https://aur.archlinux.org/sddm-sugar-candy-git.git "$tmpdir" || { rm -rf "$tmpdir"; return 1; }
+            if [ "$DRY_RUN" = 1 ]; then
+                echo "+ cd $tmpdir && makepkg -si --noconfirm"
+            else
+                (cd "$tmpdir" && makepkg -si --noconfirm) || { rm -rf "$tmpdir"; return 1; }
+            fi
+            rm -rf "$tmpdir"
         else
-            warn "Sugar Candy requires the AUR package sddm-sugar-candy-git."
-            warn "No AUR helper (yay/paru) found, so SDDM was not enabled."
+            warn "Sugar Candy requires sddm-sugar-candy-git from the AUR."
+            warn "Neither yay, paru, nor git/makepkg was found to build it."
             return 1
         fi
-
-        log "Installing Sugar Candy from the AUR via $aur_helper..."
-        run "$aur_helper" -S --needed sddm-sugar-candy-git || return 1
     fi
 
     log "Configuring Sugar Candy as the SDDM theme..."
@@ -95,7 +112,7 @@ configure_sddm() {
 
     log "Setting the SDDM login-screen keyboard layout to $keymap..."
     run sudo localectl set-x11-keymap "$keymap" || return 1
-    log "Enabling SDDM..."
+    log "Enabling SDDM service..."
     run sudo systemctl enable --now sddm.service || return 1
 }
 
@@ -107,6 +124,14 @@ fi
 if ! command -v pacman >/dev/null 2>&1; then
     echo "pacman not found — this installer targets Arch/CachyOS." >&2
     exit 1
+fi
+
+if [ "$UPDATE" = 1 ]; then
+    log "Update mode enabled."
+    if [ -d "$SCRIPT_DIR/.git" ] && command -v git >/dev/null 2>&1; then
+        log "Pulling latest updates from git repository..."
+        run git -C "$SCRIPT_DIR" pull --ff-only || warn "Could not git pull automatically. Continuing with local repository files."
+    fi
 fi
 
 # ─────────────────────────────────────────────
@@ -170,6 +195,17 @@ if [ "$INSTALL_PKGS" = 1 ]; then
     fi
 else
     log "Skipping package installation (--no-pkgs)."
+fi
+
+# Detect existing keyboard layout preference before backing up configs
+if [ -z "$LAYOUT" ] && [ -f "$CONFIG_DIR/sway/config" ]; then
+    if grep -q "xkb_layout us" "$CONFIG_DIR/sway/config"; then
+        LAYOUT="qwerty"
+        log "Detected QWERTY layout in existing sway config."
+    elif grep -q "xkb_layout fr" "$CONFIG_DIR/sway/config"; then
+        LAYOUT="azerty"
+        log "Detected AZERTY layout in existing sway config."
+    fi
 fi
 
 # ─────────────────────────────────────────────
@@ -257,19 +293,25 @@ if command -v systemctl >/dev/null 2>&1; then
     elif [ "$INSTALL_PKGS" != 1 ]; then
         log "Skipping display-manager setup (--no-pkgs)."
     elif [ -t 0 ]; then
+        echo ""
+        log "Display Manager Setup (SDDM + Sugar Candy Theme)"
         if [ "$display_manager" = sddm ]; then
-            read -rp "SDDM detected. Configure Sugar Candy and the login keyboard layout? [y/N] " setup_sddm
+            echo "   SDDM is detected. Would you like to configure the Sugar Candy theme and set the login keyboard layout?"
         else
-            read -rp "No display manager detected. Install SDDM with Sugar Candy? [y/N] " setup_sddm
+            echo "   No display manager is active. Would you like to install SDDM with the Sugar Candy theme?"
         fi
+        echo "   1) Install & configure SDDM + Sugar Candy theme (Recommended)"
+        echo "   2) Skip (Start Sway from TTY or configure your own display manager)"
+        read -rp "Select option [1/2] (default: 1): " sddm_choice
+        sddm_choice="${sddm_choice:-1}"
 
-        case "$setup_sddm" in
-            y|Y|yes|YES)
+        case "$sddm_choice" in
+            1|y|Y|yes|YES)
                 if ! configure_sddm; then
-                    warn "SDDM setup was not completed. Fix the reported issue and re-run the installer."
+                    warn "SDDM setup was not completed. Fix reported issues and re-run installer."
                 fi
                 ;;
-            *) log "Skipping SDDM setup. Start Sway from a TTY or configure a display manager later." ;;
+            *) log "Skipping SDDM setup." ;;
         esac
     else
         log "No display-manager setup in non-interactive mode. Start Sway from a TTY or configure one later."
